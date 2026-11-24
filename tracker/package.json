@@ -1,0 +1,95 @@
+{
+  "name": "crewline-tracker",
+  "productName": "Crewline Tracker",
+  "version": "1.1.2",
+  "description": "Crewline desktop tracker: screenshots and activity while you're checked in",
+  "author": {
+    "name": "Crewline",
+    "email": "noreply@getcrewline.vercel.app"
+  },
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:win-zip": "electron-builder --win zip --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --universal --publish never",
+    "dist:linux": "electron-builder --linux deb --x64 --publish never"
+  },
+  "build": {
+    "appId": "app.crewline.tracker",
+    "productName": "Crewline Tracker",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/tray*.png",
+      "build/icon.png"
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false,
+      "artifactName": "CrewlineTracker-${version}-windows.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "CrewlineTracker-Setup-${version}.${ext}",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Crewline Tracker",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "icon": "build/icon.png",
+      "category": "public.app-category.business",
+      "extendInfo": {
+        "NSScreenCaptureUsageDescription": "Crewline Tracker takes a screenshot every 15 minutes while you're checked in."
+      },
+      "identity": "-",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "artifactName": "CrewlineTracker-${version}.${ext}"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "Office",
+      "executableName": "crewline-tracker",
+      "synopsis": "Crewline desktop tracker",
+      "target": [
+        "deb"
+      ],
+      "artifactName": "CrewlineTracker-${version}-linux.${ext}"
+    },
+    "deb": {
+      "afterInstall": "build/linux-after-install.sh",
+      "afterRemove": "build/linux-after-remove.sh"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://getcrewline.vercel.app/api/downloads/updates",
+        "channel": "latest"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "homepage": "https://getcrewline.vercel.app",
+  "dependencies": {
+    "electron-updater": "6.3.9"
+  }
+}

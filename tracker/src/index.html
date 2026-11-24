@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Crewline Tracker</title>
+<style>
+:root {
+  --bg: #e2e6ee; --shadow-dark: rgba(142, 154, 178, 0.5); --shadow-light: rgba(250, 251, 255, 0.62);
+  --text: #262b3d; --text-2: #535b74; --muted: #747c94; --line: rgba(120, 130, 160, 0.16);
+  --accent: #6366f1; --good: #12a150; --good-soft: rgba(18, 161, 80, 0.12); --warn: #c27c00; --warn-soft: rgba(237, 161, 0, 0.15);
+  --bad: #dc3b3b; --bad-soft: rgba(220, 59, 59, 0.12);
+  --soft: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+  --soft-sm: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+  --inset: inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark; --bg: #1f2230; --shadow-dark: rgba(10, 11, 18, 0.6); --shadow-light: rgba(52, 57, 78, 0.45);
+    --text: #e8eaf3; --text-2: #b4b9cc; --muted: #8188a0; --line: rgba(160, 170, 200, 0.12);
+    --accent: #818cf8; --good: #3ccf7f; --good-soft: rgba(60, 207, 127, 0.14); --warn: #f0b429; --warn-soft: rgba(240, 180, 41, 0.14);
+    --bad: #f07171; --bad-soft: rgba(240, 113, 113, 0.14);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { overflow-y: auto; background: var(--bg); color: var(--text); font: 14px/1.4 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; }
+main { padding: 20px; display: grid; gap: 16px; }
+button { font: inherit; color: inherit; border: 0; background: var(--bg); box-shadow: var(--soft-sm); border-radius: 12px; padding: 12px; font-weight: 700; cursor: pointer; }
+button:active { box-shadow: var(--inset); }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.primary { background: linear-gradient(135deg, #64748b, #0f172a); color: #fff; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand img { width: 34px; height: 34px; }
+.brand b { font-size: 16px; display: block; }
+.brand small { color: var(--muted); font-size: 12px; }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.good { background: var(--good-soft); color: var(--good); }
+.warn { background: var(--warn-soft); color: var(--warn); }
+.muted-pill { background: var(--line); color: var(--text-2); }
+.bad { background: var(--bad-soft); color: var(--bad); }
+.clock { text-align: center; padding: 18px 10px; border-radius: 18px; box-shadow: var(--inset); }
+.clock b { display: block; font-size: 38px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.clock span { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.kv { display: grid; gap: 10px; }
+.kv div { padding: 10px 12px; border-radius: 14px; box-shadow: var(--soft-sm); }
+.kv span { display: block; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.kv b { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.update { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border-radius: 12px; background: rgba(99, 102, 241, 0.12); font-size: 13px; }
+.update button { width: auto; padding: 8px 12px; }
+button.link { background: none; border: 0; box-shadow: none; padding: 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; width: auto; justify-self: center; }
+.fine { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; text-align: center; }
+.picker { padding: 12px 14px; border-radius: 16px; box-shadow: var(--soft-sm); display: grid; gap: 8px; }
+.picker > label { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+select { font: inherit; font-size: 14px; font-weight: 700; color: var(--text); border: 0; background: var(--bg); box-shadow: var(--inset); border-radius: 12px; padding: 10px 12px; width: 100%; }
+select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.today { display: grid; gap: 6px; font-size: 12.5px; color: var(--text-2); }
+.today div { display: flex; justify-content: space-between; gap: 10px; }
+.today span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.today span:last-child { font-weight: 700; font-variant-numeric: tabular-nums; }
+.today .on span:first-child { color: var(--accent); font-weight: 700; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wide { grid-column: 1 / -1; }
+.note { padding: 10px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.45; }
+label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-2); }
+input { font: inherit; font-size: 14px; color: var(--text); border: 0; background: var(--bg); box-shadow: var(--inset); border-radius: 12px; padding: 11px 12px; user-select: text; }
+a { color: var(--accent); cursor: pointer; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <div class="brand"><img src="../build/icon.png" alt=""><div><b>Crewline Tracker</b><small id="who">Not signed in</small></div></div>
+    <span id="pill" class="pill muted-pill">Starting</span>
+  </div>
+
+  <form id="signin" hidden>
+    <div style="display:grid;gap:12px">
+      <p class="fine">Sign in with the same email and password you use on the Crewline website.</p>
+      <div id="creds" style="display:grid;gap:12px">
+        <label for="email">Work email<input id="email" type="email" autocomplete="username" required></label>
+        <label for="password">Password<input id="password" type="password" autocomplete="current-password" required></label>
+      </div>
+      <div id="code-step" hidden style="display:grid;gap:8px">
+        <p class="fine" id="code-sent"></p>
+        <label for="code">Sign-in code<input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label>
+        <button type="button" class="link" id="code-back">Use a different account</button>
+      </div>
+      <button class="primary" id="signin-btn" type="submit">Sign in</button>
+    </div>
+  </form>
+
+  <div id="update" class="update" hidden>
+    <span id="update-text"></span>
+    <button class="primary" id="update-btn" type="button">Restart to update</button>
+  </div>
+
+  <section id="app" hidden style="display:grid;gap:16px">
+    <div class="clock"><b id="worked">0h 00m</b><span id="clock-sub"></span></div>
+    <div class="picker" id="picker">
+      <label for="task">Working on</label>
+      <select id="task"></select>
+      <div class="today" id="today"></div>
+    </div>
+    <div class="kv">
+      <div><span>This week <small id="week-since"></small></span><b id="week">—</b></div>
+      <div><span>Activity this block</span><b id="activity">—</b></div>
+    </div>
+    <div class="actions" id="actions"></div>
+  </section>
+
+  <div id="error" class="note bad" hidden></div>
+  <div id="perm" class="note warn" hidden>
+    Screenshots need permission. Open System Settings → Privacy &amp; Security → Screen Recording and turn on Crewline Tracker.
+    <a id="perm-open">Open settings</a>
+  </div>
+
+  <p class="fine" id="foot"></p>
+  <p class="fine" id="signout-row" hidden><a id="signout">Sign out</a></p>
+</main>
+<script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# Builds the Crewline Tracker desktop app for Windows and Linux (.deb) (macOS comes later: add a macos-latest / dist:mac row).
+# Run it from the Actions tab ("Run workflow"), or push a tag like tracker-v1.0.0 to also publish a GitHub release.
+name: Crewline Tracker
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['tracker-v*']
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+          - os: ubuntu-latest
+            script: dist:linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: tracker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run ${{ matrix.script }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: crewline-tracker-${{ matrix.os }}
+          path: |
+            tracker/dist/*.exe
+            tracker/dist/*.blockmap
+            tracker/dist/*.yml
+            tracker/dist/*.deb
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/tracker-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
