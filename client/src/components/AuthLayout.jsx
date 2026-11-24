@@ -17,8 +17,9 @@ let pending = null; // { height, at } from the card that just left
 
 async function leave(root) {
   const card = root?.querySelector('.auth-card');
-  if (!card || reduced() || !card.animate) return;
+  if (!card || !card.animate) return;
   pending = { height: card.offsetHeight, at: Date.now() };
+  if (reduced()) return; // the next card just fades in
   const out = [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-10px)' }];
   const parts = [...card.children, ...root.querySelectorAll('.auth-hero-copy, .auth-switch')];
   await Promise.all(parts.map((el) => el.animate(out, { duration: 170, easing: 'ease-in', fill: 'forwards' }).finished)).catch(() => {});
@@ -28,7 +29,9 @@ function enter(root) {
   const from = pending;
   pending = null;
   const card = root?.querySelector('.auth-card');
-  if (!from || !card || Date.now() - from.at > 1500 || reduced() || !card.animate) return;
+  if (!from || !card || Date.now() - from.at > 1500 || !card.animate) return;
+  // Reduce motion: no movement or resizing, only a short fade.
+  if (reduced()) return void card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160 });
   const to = card.offsetHeight;
   card.style.overflow = 'hidden';
   card.animate([{ height: `${from.height}px` }, { height: `${to}px` }], { duration: 380, easing: EASE })
