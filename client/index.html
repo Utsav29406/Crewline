@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Crewline" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Crewline HRMS · People · Time · Pay</title>
+    <meta name="description" content="Crewline is an HR and attendance system for small teams: face-verified check-in inside the office geofence, breaks and lunch, leave requests, monthly payroll and payslips, a live staff map, reports, and an optional desktop activity tracker." />
+    <link rel="canonical" href="https://getcrewline.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Crewline" />
+    <meta property="og:title" content="Crewline HRMS · People · Time · Pay" />
+    <meta property="og:description" content="Attendance with face check-in and geofencing, leaves, payroll and payslips, in one HR app for small teams." />
+    <meta property="og:url" content="https://getcrewline.vercel.app/" />
+    <meta property="og:image" content="https://getcrewline.vercel.app/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#e2e6ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1f2230" media="(prefers-color-scheme: dark)" />
+    <style>
+      html { background: #e2e6ee; }
+      @media (prefers-color-scheme: dark) { html:not([data-theme='light']) { background: #1f2230; } }
+      html[data-theme='dark'] { background: #1f2230; }
+    </style>
+    <script>
+      try {
+        var t = localStorage.getItem('crewline.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Plain-text summary for crawlers and link previews that don't run JavaScript; React replaces it on load. -->
+    <div id="root">
+      <main style="opacity:0">
+        <h1>Crewline HRMS</h1>
+        <p>People · Time · Pay. Crewline is a web HR and attendance system for small companies. Staff sign in on a phone or computer; admins and HR manage everything from the same app.</p>
+        <h2>Features</h2>
+        <ul>
+          <li>Attendance: check in and out with a face match, only inside the office geofence; late marks with a grace period, half days, and hours worked.</li>
+          <li>Breaks and lunch, tracked against the working day.</li>
+          <li>Leave requests and approvals, with leave balances.</li>
+          <li>Payroll: monthly salary runs and downloadable payslips.</li>
+          <li>Live map of who is checked in and where.</li>
+          <li>Reports, notifications, employees, geofences and company settings for admins and HR.</li>
+          <li>Optional Windows desktop tracker: periodic screenshots and activity while checked in, with automatic breaks when idle.</li>
+        </ul>
+        <p>Sign in at <a href="https://getcrewline.vercel.app/">getcrewline.vercel.app</a> with your company account, or register a new company.</p>
+      </main>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
