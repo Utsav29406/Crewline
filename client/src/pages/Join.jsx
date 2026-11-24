@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api, API_BASE } from '../api.js';
 import { GoogleMark } from './Login.jsx';
 import Icon from '../components/Icon.jsx';
-import Logo from '../components/Logo.jsx';
+import AuthLayout, { MorphLink } from '../components/AuthLayout.jsx';
 import { Field } from '../components/ui.jsx';
+
+const JOIN_STEPS = [
+  { icon: 'send', title: 'Confirm your email', text: 'We email you a 6-digit code, or use Continue with Google.' },
+  { icon: 'shield', title: 'HR approves you', text: 'You can sign in as soon as HR lets you in.' },
+  { icon: 'face', title: 'Punch in from your phone', text: 'Enroll your face once, then check in at the office.' },
+];
 
 /**
  * Staff sign-up: email → emailed code + name + password → waits for HR approval.
@@ -58,15 +64,15 @@ export default function Join() {
   });
 
   return (
-    <div className="auth-solo">
-      <Link to="/" className="brand auth-solo-brand"><Logo /><div className="brand-name">Crewline</div></Link>
+    <AuthLayout title={linkCompany ? `Join ${linkCompany}` : 'Join your team'} accent="on Crewline." points={JOIN_STEPS}
+      lead="Sign up in a minute. HR approves your request, then you punch in from your phone.">
       <div className="card auth-card" style={{ padding: 32 }}>
         {link && linkError ? (
           <div className="stack" style={{ textAlign: 'center', alignItems: 'center' }}>
             <div className="stat-icon tone-bad" style={{ width: 56, height: 56 }}><Icon name="alert" /></div>
             <h2 style={{ fontSize: 22, margin: 0 }}>Link not active</h2>
             <p className="muted" style={{ margin: 0 }}>{linkError}</p>
-            <Link to="/" className="btn btn-block" style={{ marginTop: 8 }}>Back to sign in</Link>
+            <MorphLink to="/" className="btn btn-block" style={{ marginTop: 8 }}>Back to sign in</MorphLink>
           </div>
         ) : step === 'done' ? (
           <div className="stack" style={{ textAlign: 'center', alignItems: 'center' }}>
@@ -75,7 +81,7 @@ export default function Join() {
             <p className="muted" style={{ margin: 0 }}>
               HR at <b>{company}</b> will review it. We'll email <b>{email}</b> when you're approved, then you can sign in.
             </p>
-            <Link to="/" className="btn btn-block" style={{ marginTop: 8 }}>Back to sign in</Link>
+            <MorphLink to="/" className="btn btn-block" style={{ marginTop: 8 }}>Back to sign in</MorphLink>
           </div>
         ) : (
           <>
@@ -130,7 +136,7 @@ export default function Join() {
           </>
         )}
       </div>
-      <p className="auth-register small muted">Already have an account? <Link to="/">Sign in</Link></p>
-    </div>
+      <p className="auth-switch small muted">Already have an account? <MorphLink to="/">Sign in</MorphLink></p>
+    </AuthLayout>
   );
 }

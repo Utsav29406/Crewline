@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import { useApp } from '../context.jsx';
 import Icon from '../components/Icon.jsx';
-import Logo from '../components/Logo.jsx';
+import AuthLayout, { MorphLink } from '../components/AuthLayout.jsx';
 import LogoPicker from '../components/LogoPicker.jsx';
 import { Field } from '../components/ui.jsx';
 
@@ -57,35 +56,7 @@ export default function Register() {
   };
 
   return (
-    <div className="auth">
-      <section className="auth-hero">
-        <div className="brand" style={{ padding: 0 }}>
-          <Logo />
-          <div>
-            <div className="brand-name">Crewline</div>
-            <div className="brand-sub">Smart HRMS</div>
-          </div>
-        </div>
-        <div>
-          <h1>Set up Crewline<br /><span className="grad">for your company.</span></h1>
-          <p className="muted" style={{ fontSize: 16, maxWidth: 460 }}>
-            Free to start. You'll be the admin of a brand-new workspace in under a minute.
-          </p>
-        </div>
-        <div className="stack features">
-          {STEPS.map((f) => (
-            <div key={f.title} className="feature">
-              <div className="stat-icon tone-accent" style={{ width: 46, height: 46 }}><Icon name={f.icon} /></div>
-              <div>
-                <h3>{f.title}</h3>
-                <div className="muted">{f.text}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="auth-form">
+    <AuthLayout title="Set up Crewline" accent="for your company." lead="Free to start. You'll be the admin of a brand-new workspace in under a minute." points={STEPS}>
         {codeSent ? (
           <form className="card auth-card stack" style={{ padding: 32 }} onSubmit={create}>
             <div>
@@ -140,11 +111,10 @@ export default function Register() {
             {busy ? <span className="spin" /> : <Icon name="send" />} Email me a code
           </button>
           <p className="small muted" style={{ textAlign: 'center', margin: 0 }}>
-            Already have an account? <Link to="/">Sign in</Link>
+            Already have an account? <MorphLink to="/">Sign in</MorphLink>
           </p>
         </form>
         )}
-      </section>
-    </div>
+    </AuthLayout>
   );
 }

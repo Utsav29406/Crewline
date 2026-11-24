@@ -371,6 +371,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .auth-tile:hover { box-shadow: var(--soft); transform: translateY(-1px); }
 .auth-tile b { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 14px; font-weight: 700; }
 .auth-solo > .auth-register { display: block; text-align: center; }
+.auth-switch { text-align: center; margin: 18px 0 0; }
+.auth-switch a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .auth-solo > .auth-register a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .auth-demo { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .auth-demo-chips { display: flex; gap: 6px; }

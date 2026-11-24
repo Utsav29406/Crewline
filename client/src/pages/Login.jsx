@@ -3,7 +3,7 @@ import { api, API_BASE } from '../api.js';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context.jsx';
 import Icon from '../components/Icon.jsx';
-import Logo from '../components/Logo.jsx';
+import AuthLayout, { MorphLink } from '../components/AuthLayout.jsx';
 import { Field } from '../components/ui.jsx';
 import { isNativeApp } from '../native.js';
 
@@ -96,35 +96,7 @@ export default function Login() {
   };
 
   return (
-    <div className="auth">
-      <section className="auth-hero">
-        <div className="brand" style={{ padding: 0 }}>
-          <Logo />
-          <div>
-            <div className="brand-name">Crewline</div>
-            <div className="brand-sub">Smart HRMS</div>
-          </div>
-        </div>
-        <div>
-          <h1>Your people,<br /><span className="grad">verified in a glance.</span></h1>
-          <p className="muted" style={{ fontSize: 16, maxWidth: 460 }}>
-            Attendance, leave and payroll in one soft, calm workspace — secured by face recognition and geofencing.
-          </p>
-        </div>
-        <div className="stack features">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="feature">
-              <div className="stat-icon tone-accent" style={{ width: 46, height: 46 }}><Icon name={f.icon} /></div>
-              <div>
-                <h3>{f.title}</h3>
-                <div className="muted">{f.text}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="auth-form">
+    <AuthLayout title="Your people," accent="verified in a glance." lead="Attendance, leave and payroll in one soft, calm workspace, secured by face recognition and geofencing." points={FEATURES}>
         <div className="card auth-card" style={{ padding: 32 }}>
           <h2 style={{ fontSize: 24 }}>Welcome back</h2>
           <p className="muted" style={{ marginTop: 4 }}>Sign in to your workspace</p>
@@ -173,14 +145,14 @@ export default function Login() {
           </>
           )}
           <div className="auth-register">
-            <Link to="/join" className="auth-tile">
+            <MorphLink to="/join" className="auth-tile">
               <span className="small muted">Joining a team?</span>
               <b>Sign up <Icon name="arrow" size={14} /></b>
-            </Link>
-            <Link to="/register" className="auth-tile">
+            </MorphLink>
+            <MorphLink to="/register" className="auth-tile">
               <span className="small muted">New company?</span>
               <b>Register it <Icon name="arrow" size={14} /></b>
-            </Link>
+            </MorphLink>
           </div>
           <div className="auth-demo">
             <div className="small muted">Try the demo company</div>
@@ -199,7 +171,6 @@ export default function Login() {
           <span aria-hidden="true">·</span>
           <Link to="/terms">Terms of Service</Link>
         </div>
-      </section>
-    </div>
+    </AuthLayout>
   );
 }
