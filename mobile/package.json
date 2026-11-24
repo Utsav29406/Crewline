@@ -1,0 +1,19 @@
+{
+  "name": "crewline-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Crewline Android app: the Crewline website plus phone GPS with fake-location detection and punch reminders",
+  "scripts": {
+    "sync": "cap sync android",
+    "build:apk": "cap sync android && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.1",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "6.2.1",
+    "@capacitor/local-notifications": "6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.1"
+  }
+}

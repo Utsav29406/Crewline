@@ -1,0 +1,19 @@
+{
+  "appId": "com.crewline.app",
+  "appName": "Crewline",
+  "webDir": "www",
+  "server": {
+    "url": "https://getcrewline.vercel.app",
+    "androidScheme": "https",
+    "allowNavigation": ["getcrewline.vercel.app"]
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_crewline",
+      "iconColor": "#6366F1"
+    }
+  }
+}
