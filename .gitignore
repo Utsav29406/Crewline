@@ -1,0 +1,21 @@
+node_modules
+*.db
+*.db-*
+.env
+dist
+.pgdata
+.vercel
+.env*
+.firebase
+# build output and local tools
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/src/main/assets/public/
+*.jks
+*.keystore
+*.pem
+*.log
+.DS_Store
+!.env.example

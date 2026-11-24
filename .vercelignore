@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+server/.pgdata
+client/dist
+.env
+**/.env
+.env*
+**/.env.local
+*.db
+*.db-*
+.firebase
+tracker
