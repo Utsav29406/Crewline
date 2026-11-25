@@ -75,7 +75,7 @@ export default function Punch() {
       const phone = isNativeApp() ? await nativeLocation() : null;
       const where = phone || geo.coords || {};
       await api.post(`/attendance/${action}`, {
-        descriptor: descriptors?.[0],
+        descriptors: descriptors || undefined,
         lat: where.lat,
         lng: where.lng,
         accuracy: where.accuracy,
@@ -192,7 +192,7 @@ export default function Punch() {
 
       {capturing && (
         <Modal title={action === 'check-in' ? 'Verify to check in' : 'Verify to check out'} onClose={() => setCapturing(false)} width={520}>
-          <FaceCapture samples={1} onCapture={submit} actionLabel={action === 'check-in' ? 'Check-in' : 'Check-out'} />
+          <FaceCapture samples={3} onCapture={submit} actionLabel={action === 'check-in' ? 'Check-in' : 'Check-out'} />
         </Modal>
       )}
     </>

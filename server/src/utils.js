@@ -20,6 +20,28 @@ export function isValidDescriptor(d) {
   return Array.isArray(d) && d.length === 128 && d.every((n) => typeof n === 'number' && Number.isFinite(n));
 }
 
+// Two scans of the same live person taken a moment apart stay well under this; a different face lands above it.
+const SAME_PERSON = 0.5;
+// A camera never produces the same numbers twice, so scans closer than this were copied, not captured.
+const COPIED = 0.005;
+
+/** Checks the scans from one face capture: between min and max of them, the same person throughout, none copied. */
+export function faceSamplesError(list, min, max) {
+  if (!Array.isArray(list) || list.length < min || list.length > max || !list.every(isValidDescriptor)) {
+    return `Send ${min}–${max} face scans from one capture`;
+  }
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      const d = euclidean(list[i], list[j]);
+      if (d > SAME_PERSON) return FACE_CHANGED;
+      if (d < COPIED) return FACE_COPIED;
+    }
+  }
+  return null;
+}
+export const FACE_CHANGED = 'Your face changed during the scan. Keep only your own face in the frame and scan again.';
+export const FACE_COPIED = 'These face scans are copies of each other. Scan your face again with the camera.';
+
 const LOGO = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/;
 export const MAX_LOGO_BYTES = 200 * 1024;
 

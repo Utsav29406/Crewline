@@ -6,7 +6,7 @@ import { audit, diff } from '../audit.js';
 import { requireRole, isManager, isProtectedDemoAccount } from '../auth.js';
 import { emit } from '../events.js';
 import { removeFiles } from '../blobs.js';
-import { clock, isValidDescriptor } from '../utils.js';
+import { clock, faceSamplesError } from '../utils.js';
 
 const clockDate = (tz) => clock(tz).date;
 import { PROFILE_SQL, getProfile } from './auth.js';
@@ -15,6 +15,7 @@ import crypto from 'node:crypto';
 import { mailer, sendMail, simpleEmail } from '../mail.js';
 
 const router = Router();
+const MIN_FACE_SAMPLES = 3;
 const MAX_FACE_SAMPLES = 5;
 const DUPLICATE = { error: 'Email or employee code already exists' };
 const BAD_EMAIL = { error: 'Enter a full email address, like name@company.com' };
@@ -299,10 +300,10 @@ router.post('/:id/face', async (req, res) => {
   if (!isManager(req.user) && !(self && (!existing.face_descriptors || req.user.is_demo))) {
     return res.status(403).json({ error: 'Face already enrolled. Ask HR to reset it.' });
   }
-  if (!Array.isArray(descriptors) || !descriptors.length || !descriptors.every(isValidDescriptor)) {
-    return res.status(400).json({ error: 'Provide 1–5 valid 128-d face descriptors' });
-  }
-  const samples = descriptors.slice(0, MAX_FACE_SAMPLES);
+  // Several scans of one person, so a single bad frame (or someone else's face) can't become the reference.
+  const bad = faceSamplesError(descriptors, MIN_FACE_SAMPLES, MAX_FACE_SAMPLES);
+  if (bad) return res.status(400).json({ error: bad });
+  const samples = descriptors;
   await db.run('UPDATE users SET face_descriptors = ? WHERE id = ? AND company_id = ?', [JSON.stringify(samples), id, req.user.company_id]);
   await changed(req, id);
   res.json({ ok: true, samples: samples.length });

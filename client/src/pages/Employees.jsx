@@ -315,7 +315,7 @@ export default function Employees() {
       )}
       {enrolling && (
         <Modal title={`Enroll face · ${enrolling.name}`} onClose={() => setEnrolling(null)} width={520}>
-          <FaceCapture samples={3} onCapture={enroll} actionLabel="Enrollment" />
+          <FaceCapture samples={5} onCapture={enroll} actionLabel="Enrollment" />
         </Modal>
       )}
     </>

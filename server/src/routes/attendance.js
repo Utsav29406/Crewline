@@ -2,12 +2,16 @@ import { Router } from 'express';
 import db, { getSettings, isUniqueViolation, tx } from '../db.js';
 import { requireRole, isManager } from '../auth.js';
 import { emit } from '../events.js';
-import { haversine, euclidean, isValidDescriptor, clock, addDays, minutesBetween, isWeeklyOff, parseSaturdaysOff } from '../utils.js';
+import { haversine, euclidean, faceSamplesError, FACE_CHANGED, FACE_COPIED, clock, addDays, minutesBetween, isWeeklyOff, parseSaturdaysOff } from '../utils.js';
 import { sendDailyLog } from '../dailyLog.js';
 import { audit } from '../audit.js';
 
 const router = Router();
-const FACE_THRESHOLD = Number(process.env.FACE_MATCH_THRESHOLD || 0.5);
+// A punch sends several scans. Their average distance from the enrolled face must be within FACE_THRESHOLD,
+// and no single scan may be further than FACE_WORST (genuine punches average about 0.35).
+const FACE_THRESHOLD = Number(process.env.FACE_MATCH_THRESHOLD || 0.45);
+const FACE_WORST = FACE_THRESHOLD + 0.05;
+const PUNCH_SCANS = { min: 3, max: 5 };
 // GPS accuracy we are willing to forgive at the fence edge, in metres.
 const MAX_ACCURACY_SLACK_M = 30;
 
@@ -25,7 +29,13 @@ async function activeFencesFor(user) {
  * flagged for HR, because a phone that hasn't moved can honestly repeat a reading.
  */
 const REPLAY_FACE_DISTANCE = 0.02; // genuine scans of the same face differ by roughly 0.1-0.4
-const RECENT_FACES = 10;
+const RECENT_FACES = 30; // the last 10 punches, 3 scans each
+// After this many failed face checks in LOCK_MINUTES, face punches stop for a while (HR is told about each failure).
+const LOCK_FAILS = 5;
+const LOCK_MINUTES = 15;
+const FACE_NO_MATCH = 'Face did not match';
+const FACE_REPLAY = 'This face scan was used before. Scan your face again with the camera.';
+const FACE_FAILURES = [FACE_NO_MATCH, FACE_REPLAY, FACE_CHANGED, FACE_COPIED];
 const MAX_SPEED_KMH = 250;
 
 async function locationFlags(user, { lat, lng, accuracy }, fence) {
@@ -53,7 +63,7 @@ async function locationFlags(user, { lat, lng, accuracy }, fence) {
 }
 
 /** Runs face + geofence checks. Returns { ok, reason, fence, distanceM, faceDistance, flags }. */
-async function verify(user, { descriptor, lat, lng, accuracy, mock }, settings) {
+async function verify(user, { descriptor, descriptors, lat, lng, accuracy, mock }, settings) {
   const result = { ok: true, fence: null, distanceM: null, faceDistance: null, flags: [] };
 
   // The Android app reads the location from the phone itself, which knows when a fake-GPS app supplied it.
@@ -64,14 +74,25 @@ async function verify(user, { descriptor, lat, lng, accuracy, mock }, settings) 
   if (settings.require_face === '1') {
     const row = await db.get('SELECT face_descriptors, recent_faces FROM users WHERE id = ?', [user.id]);
     if (!row.face_descriptors) return { ...result, ok: false, reason: 'Face not enrolled. Enroll your face first.' };
-    if (!isValidDescriptor(descriptor)) return { ...result, ok: false, reason: 'No face captured' };
-    result.faceDistance = Math.min(...row.face_descriptors.map((s) => euclidean(s, descriptor)));
-    if (result.faceDistance > FACE_THRESHOLD) return { ...result, ok: false, reason: 'Face did not match' };
-    const seen = [...row.face_descriptors, ...(row.recent_faces || [])];
-    if (seen.some((s) => euclidean(s, descriptor) < REPLAY_FACE_DISTANCE)) {
-      return { ...result, ok: false, reason: 'This face scan was used before. Scan your face again with the camera.' };
+    // A page opened before this check got stricter sends one scan: it needs reloading.
+    if (descriptor && !descriptors) return { ...result, ok: false, reason: 'This page is out of date. Reload it, then scan your face again.' };
+    const since = clock(user.timezone, new Date(Date.now() - LOCK_MINUTES * 60 * 1000)).dateTime;
+    const { fails } = await db.get(
+      'SELECT COUNT(*)::int AS fails FROM attendance_attempts WHERE user_id = ? AND NOT success AND reason = ANY(?) AND created_at >= ?',
+      [user.id, FACE_FAILURES, since]
+    );
+    if (fails >= LOCK_FAILS) {
+      return { ...result, ok: false, reason: `Too many failed face scans. Try again in ${LOCK_MINUTES} minutes, or ask HR to check in for you.` };
     }
-    result.descriptor = descriptor;
+    if (!descriptors) return { ...result, ok: false, reason: 'No face captured' };
+    const bad = faceSamplesError(descriptors, PUNCH_SCANS.min, PUNCH_SCANS.max);
+    if (bad) return { ...result, ok: false, reason: bad };
+    const each = descriptors.map((d) => Math.min(...row.face_descriptors.map((s) => euclidean(s, d))));
+    result.faceDistance = Math.round((each.reduce((a, b) => a + b, 0) / each.length) * 1000) / 1000;
+    if (result.faceDistance > FACE_THRESHOLD || Math.max(...each) > FACE_WORST) return { ...result, ok: false, reason: FACE_NO_MATCH };
+    const seen = [...row.face_descriptors, ...(row.recent_faces || [])];
+    if (descriptors.some((d) => seen.some((s) => euclidean(s, d) < REPLAY_FACE_DISTANCE))) return { ...result, ok: false, reason: FACE_REPLAY };
+    result.descriptors = descriptors;
   }
 
   if (settings.require_geofence === '1') {
@@ -107,14 +128,14 @@ async function logAttempt(user, action, v, { lat, lng }) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [user.company_id, user.id, action, v.ok, v.reason || null, lat ?? null, lng ?? null, v.distanceM, v.faceDistance, flags, clock(user.timezone).dateTime]
   );
-  if (v.ok && v.descriptor) {
-    // Remember the scan, so sending it again later is caught as a replay.
+  if (v.ok && v.descriptors) {
+    // Remember the scans (oldest first), so sending one again later is caught as a replay.
     await db.run(
       `UPDATE users SET recent_faces = (
-         SELECT jsonb_agg(f) FROM (SELECT f FROM jsonb_array_elements(COALESCE(recent_faces, '[]'::jsonb) || jsonb_build_array(?::jsonb)) WITH ORDINALITY AS x(f, n)
-                                   ORDER BY n DESC LIMIT ?) y)
+         SELECT jsonb_agg(f ORDER BY n) FROM (SELECT f, n FROM jsonb_array_elements(COALESCE(recent_faces, '[]'::jsonb) || ?::jsonb) WITH ORDINALITY AS x(f, n)
+                                              ORDER BY n DESC LIMIT ?) y)
        WHERE id = ?`,
-      [JSON.stringify(v.descriptor), RECENT_FACES, user.id]
+      [JSON.stringify(v.descriptors), RECENT_FACES, user.id]
     );
   }
   if (v.ok && flags) {

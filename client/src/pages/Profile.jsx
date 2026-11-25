@@ -144,7 +144,7 @@ export default function Profile() {
               {user.face_enrolled ? <Badge tone="good">enrolled</Badge> : <Badge tone="warn">not enrolled</Badge>}
             </div>
             {enrolling ? (
-              <FaceCapture samples={3} onCapture={enroll} onCancel={() => setEnrolling(false)} actionLabel="Enrollment" />
+              <FaceCapture samples={5} onCapture={enroll} onCancel={() => setEnrolling(false)} actionLabel="Enrollment" />
             ) : (
               <>
                 <p className="muted" style={{ margin: 0 }}>
