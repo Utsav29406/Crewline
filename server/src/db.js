@@ -69,6 +69,7 @@ export const DEFAULT_SETTINGS = {
   payroll_pt: '200', // monthly professional tax (0 to disable)
   saturdays_off: '', // e.g. '2,4' = 2nd and 4th Saturdays off (Sundays are always off)
   daily_log_email: '0', // '1' = email each person their day's attendance log on punch-out
+  auto_announcements: '1', // '1' = the notice board also posts birthdays, work anniversaries, new joiners and holidays
   tracker_prompt: '1', // '1' = dashboard asks people without a connected desktop tracker to install it
   email_notifications: '0', // '1' = also email people their own notifications (leave decisions, new tasks...)
   overtime_after_minutes: '480', // worked minutes in a day after which the rest counts as overtime (reports only)

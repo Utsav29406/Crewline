@@ -200,6 +200,7 @@ function settingError(key, value) {
     case 'payroll_pf':
     case 'daily_log_email':
     case 'tracker_prompt':
+    case 'auto_announcements':
     case 'email_notifications':
     case 'leave_half_day':
     case 'comp_off':

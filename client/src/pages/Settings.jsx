@@ -149,6 +149,7 @@ export default function Settings() {
               ['payroll_pf', 'Deduct Provident Fund', 'Payroll deducts 12% of basic pay, capped at 1,800 a month'],
               ['daily_log_email', 'Email daily attendance log', 'Each person gets their day (check-in, breaks, lunch, check-out, hours) at their work email when they punch out'],
               ['email_notifications', 'Email notifications', 'People also get their own notifications by email: leave decisions, new tasks, attendance fixes, payslips'],
+              ['auto_announcements', 'Automatic announcements', 'The notice board wishes people on birthdays and work anniversaries, welcomes new joiners and reminds everyone of holidays'],
               ['tracker_prompt', 'Ask people to install the tracker', 'The dashboard shows a download card on computers until that person’s desktop tracker connects'],
             ].map(([k, title, hint]) => (
               <div key={k} className="check-item">

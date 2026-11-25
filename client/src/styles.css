@@ -604,7 +604,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Notice board and celebrations */
 .notice { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface-raised); }
-.notice-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; }
+.notice-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; background: var(--accent-soft); color: var(--accent); flex-shrink: 0; }
 .notice-body { margin: 4px 0 6px; color: var(--text-2); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
 .celebrations { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 .celebration { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface-raised); min-width: 0; }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { useApp, useLive } from '../context.jsx';
 import Icon from './Icon.jsx';
-import { Field, Modal } from './ui.jsx';
+import { Field, Modal, Switch } from './ui.jsx';
 import { addDays, fmtDate } from '../format.js';
 
 function PostModal({ onClose, onPosted }) {
@@ -38,10 +38,24 @@ function PostModal({ onClose, onPosted }) {
 export function Announcements() {
   const { isManager, toast } = useApp();
   const [items, setItems] = useState(null);
+  const [auto, setAuto] = useState(true);
   const [posting, setPosting] = useState(false);
-  const load = () => api.get('/announcements').then(setItems).catch(() => setItems([]));
+  const load = () => api.get('/announcements')
+    .then((r) => { setItems(r.items); setAuto(r.auto); })
+    .catch(() => setItems([]));
+  const toggleAuto = async (on) => {
+    setAuto(on);
+    try {
+      await api.put('/announcements/auto', { on });
+      toast(on ? 'Automatic announcements are on' : 'Automatic announcements are off. Post your own with New.');
+      load();
+    } catch (err) {
+      setAuto(!on);
+      toast(err.message, 'error');
+    }
+  };
   useEffect(() => { load(); }, []);
-  useLive(['announcement'], load);
+  useLive(['announcement', 'employee'], load);
 
   const remove = async (a) => {
     if (!confirm(`Remove "${a.title}"?`)) return;
@@ -58,24 +72,37 @@ export function Announcements() {
     <div className="card" style={{ marginBottom: 22 }}>
       <div className="card-head">
         <h2>Announcements</h2>
-        {isManager && <button className="btn btn-sm" onClick={() => setPosting(true)}><Icon name="plus" size={15} /> New</button>}
+        {isManager && (
+          <div className="row" style={{ gap: 12 }}>
+            <span className="row small muted" style={{ gap: 8 }} title="Birthdays, work anniversaries, new joiners and holidays, posted for you">
+              Automatic <Switch on={auto} onChange={toggleAuto} label="Automatic announcements" />
+            </span>
+            <button className="btn btn-sm" onClick={() => setPosting(true)}><Icon name="plus" size={15} /> New</button>
+          </div>
+        )}
       </div>
       <div className="stack">
         {items.map((a) => (
           <div key={a.id} className="notice">
-            <div className="notice-icon"><Icon name="bell" size={16} /></div>
+            <div className="notice-icon" aria-hidden={a.auto || undefined}>{a.auto ? a.emoji : <Icon name="bell" size={16} />}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <b>{a.title}</b>
               {a.body && <div className="notice-body">{a.body}</div>}
               <div className="small muted">
-                {a.author || 'Admin'} · {fmtDate(a.created_at, { day: 'numeric', month: 'short' })}
+                {a.auto ? 'Crewline · Today' : <>{a.author || 'Admin'} · {fmtDate(a.created_at, { day: 'numeric', month: 'short' })}</>}
                 {a.expires_on && ` · until ${fmtDate(a.expires_on, { day: 'numeric', month: 'short' })}`}
               </div>
             </div>
-            {isManager && <button className="btn btn-icon btn-sm" onClick={() => remove(a)} aria-label={`Remove ${a.title}`}><Icon name="x" size={14} /></button>}
+            {isManager && !a.auto && <button className="btn btn-icon btn-sm" onClick={() => remove(a)} aria-label={`Remove ${a.title}`}><Icon name="x" size={14} /></button>}
           </div>
         ))}
-        {!items.length && <div className="muted small">Nothing posted. Use New to tell everyone about a holiday, an office closure or news.</div>}
+        {!items.length && (
+          <div className="muted small">
+            {auto
+              ? 'Nothing today. Birthdays, work anniversaries, new joiners and holidays show up here by themselves. Use New to post your own.'
+              : 'Automatic announcements are off. Use New to tell everyone about a holiday, an office closure or news.'}
+          </div>
+        )}
       </div>
       {posting && <PostModal onClose={() => setPosting(false)} onPosted={() => { setPosting(false); load(); }} />}
     </div>
