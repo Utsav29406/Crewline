@@ -14,7 +14,7 @@ const DEMO = [
 ];
 
 const FEATURES = [
-  { icon: 'face', title: 'Face recognition', text: 'Contactless punch-in with on-device recognition and blink liveness.' },
+  { icon: 'face', title: 'Face recognition', text: 'Contactless punch-in with on-device recognition and a random gesture check against photos and videos.' },
   { icon: 'map', title: 'Geofencing', text: 'Attendance only counts inside your office perimeter.' },
   { icon: 'chart', title: 'Payroll ready', text: 'Monthly attendance, leave and payable-days reports.' },
 ];

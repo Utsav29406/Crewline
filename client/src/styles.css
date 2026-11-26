@@ -184,7 +184,7 @@ h3 { font-size: 15px; font-weight: 700; }
 
 /* ---------- Surfaces ---------- */
 .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--soft); padding: 22px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .inset { box-shadow: var(--inset); border-radius: var(--radius-sm); }
 .grid { display: grid; gap: 22px; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -598,7 +598,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; font-weight: 600; }
 .link-btn.muted { color: var(--muted); }
 .link-btn:hover { text-decoration: underline; }
-.tracker-steps { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 8px; color: var(--text-2); }
+.tracker-steps { margin: 14px 0 0; padding-left: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; color: var(--text-2); }
+.tracker-steps li { min-width: 0; }
 .tracker-cmd { margin-top: 8px; gap: 8px; padding: 8px 8px 8px 12px; border-radius: var(--radius-sm); box-shadow: var(--inset); min-width: 0; }
 .tracker-cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font-size: 12.5px; color: var(--text); }
 
@@ -699,7 +700,9 @@ button.nav-link { width: 100%; border: 0; background: none; font: inherit; curso
 
   /* Page heads: title, then the actions as a tidy row */
   .page-head { margin-bottom: 16px; gap: 12px; align-items: flex-start; }
-  .page-head > .row { width: 100%; }
+  .page-head > .row { width: 100%; flex-wrap: wrap; }
+  .page-head .row.inset { flex: 1 1 100%; min-width: 0; }
+  .page-head .row.inset .input { min-width: 0; width: 100%; }
   .page-head .tabs { width: 100%; overflow-x: auto; }
 
   /* Pop-ups slide up from the bottom like a phone sheet */
@@ -732,6 +735,9 @@ button.nav-link { width: 100%; border: 0; background: none; font: inherit; curso
   table.table-cards td.empty { grid-column: 1 / -1; padding: 20px 0; text-align: center !important; }
   table.table-cards tr:has(> td.empty) { box-shadow: none; background: none; }
   table.table-cards td:last-child:not(:first-child) .row { justify-content: flex-start !important; }
+  /* A row of icon buttons gets the card's full width and wraps rather than running off the edge */
+  table.table-cards td:has(> .row > .btn-icon) { grid-column: 1 / -1; }
+  table.table-cards td > .row:has(> .btn-icon) { flex-wrap: wrap; }
 }
 
 @media (max-width: 560px) {

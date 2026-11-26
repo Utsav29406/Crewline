@@ -170,7 +170,7 @@ export default function Punch() {
             <h2>Verification</h2>
             {needFace ? (
               <Check ok={user.face_enrolled} title="Face recognition"
-                detail={user.face_enrolled ? 'Enrolled · blink to verify' : <>Not enrolled — <Link to="/profile">enroll now</Link></>} />
+                detail={user.face_enrolled ? 'Enrolled · follow two quick gestures to verify' : <>Not enrolled — <Link to="/profile">enroll now</Link></>} />
             ) : <Check ok title="Face recognition" detail="Not required by policy" />}
             {needGeo ? (
               <Check ok={inside && precise} pending={geo.loading}
